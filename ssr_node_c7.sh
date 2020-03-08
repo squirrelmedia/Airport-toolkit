@@ -5,7 +5,7 @@ cat << "EOF"
 Author: squirrelmedia
 Github: https://github.com/squirrelmedia/Airport-toolkit                                 
 EOF
-echo "适用于CentOS 7 x64的Shadowsocksr服务器安装脚本"
+echo "适用于CentOS 7 x64的Shadowsocksr服务器安装脚本-----由squirrelmedia汉化"
 [ $(id -u) != "0" ] && { echo "错误：您必须是root用户才能运行此脚本！"; exit 1; }
 ARG_NUM=$#
 TEMP=`getopt -o hvV --long is_auto:,connection_method:,is_mu:,webapi_url:,webapi_token:,db_ip:,db_name:,db_user:,db_password:,node_id:-- "$@" 2>/dev/null`
