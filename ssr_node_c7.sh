@@ -1,34 +1,26 @@
 #!/usr/bin/env bash
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
-cat << "EOF"
- ______                               ____              __      
-/\__  _\               __            /\  _`\           /\ \__   
-\/_/\ \/   ___   __  _/\_\    ___    \ \ \/\_\     __  \ \ ,_\  
-   \ \ \  / __`\/\ \/'\/\ \  /'___\   \ \ \/_/_  /'__`\ \ \ \/  
-    \ \ \/\ \L\ \/>  </\ \ \/\ \__/    \ \ \L\ \/\ \L\.\_\ \ \_ 
-     \ \_\ \____//\_/\_\\ \_\ \____\    \ \____/\ \__/.\_\\ \__\
-      \/_/\/___/ \//\/_/ \/_/\/____/     \/___/  \/__/\/_/ \/__/
-                                                                
-Author: Toxic Cat
-Github: https://github.com/Toxic-Cat/Airport-toolkit                                 
+cat << "EOF"                                                         
+Author: squirrelmedia
+Github: https://github.com/squirrelmedia/Airport-toolkit                                 
 EOF
-echo "Shadowsocksr server installation script for CentOS 7 x64"
-[ $(id -u) != "0" ] && { echo "Error: You must be root to run this script!"; exit 1; }
+echo "适用于CentOS 7 x64的Shadowsocksr服务器安装脚本"
+[ $(id -u) != "0" ] && { echo "错误：您必须是root用户才能运行此脚本！"; exit 1; }
 ARG_NUM=$#
 TEMP=`getopt -o hvV --long is_auto:,connection_method:,is_mu:,webapi_url:,webapi_token:,db_ip:,db_name:,db_user:,db_password:,node_id:-- "$@" 2>/dev/null`
-[ $? != 0 ] && echo "ERROR: unknown argument!" && exit 1
+[ $? != 0 ] && echo "错误：参数未知！" && exit 1
 eval set -- "${TEMP}"
 while :; do
   [ -z "$1" ] && break;
   case "$1" in
 	--is_auto)
       is_auto=y; shift 1
-      [ -d "/soft/shadowsocks" ] && { echo "Shadowsocksr server software is already exist"; exit 1; }
+      [ -d "/soft/shadowsocks" ] && { echo "Shadowsocksr服务器软件已经存在"; exit 1; }
       ;;
     --connection_method)
       connection_method=$2; shift 2
-      [[ ! ${connection_method} =~ ^[1-2]$ ]] && { echo "Bad answer! Please only input number 1~2"; exit 1; }
+      [[ ! ${connection_method} =~ ^[1-2]$ ]] && { echo "错误的输入！ 请只输入数字1〜2"; exit 1; }
       ;;
     --is_mu)
       is_mu=y; shift 1
@@ -58,25 +50,25 @@ while :; do
       shift
       ;;
     *)
-      echo "ERROR: unknown argument!" && exit 1
+      echo "错误：参数未知！" && exit 1
       ;;
   esac
 done
 if [[ ${is_auto} != "y" ]]; then
-	echo "Press Y for continue the installation process, or press any key else to exit."
+	echo "按Y继续安装过程，或按其他任意键退出。"
 	read is_install
 	if [[ ${is_install} != "y" && ${is_install} != "Y" ]]; then
-    	echo -e "Installation has been canceled..."
+    	echo -e "安装已被取消..."
     	exit 0
 	fi
 fi
-echo "Checking if there any exist Shadowsocksr server software..."
+echo "正在检查是否存在Shadowsocksr服务器软件..."
 if [ -d "/soft/shadowsocks" ]; then
 	while :; do echo
-		echo -n "Detect exist shadowsocks server installation! If you continue this install, all the previous configuration will be lost! Continue?(Y/N)"
+		echo -n "检测是否存在Shadowsocks服务器安装！ 如果继续此安装，所有先前的配置都将丢失！ 继续吗？(Y/N)"
 		read is_clean_old
 		if [[ ${is_clean_old} != "y" && ${is_clean_old} != "Y" && ${is_clean_old} != "N" && ${is_clean_old} != "n" ]]; then
-			echo -n "Bad answer! Please only input number Y or N"
+			echo -n "错误的输入！ 请仅输入字母Y或N"
 		elif [[ ${is_clean_old} == "y" || ${is_clean_old} == "Y" ]]; then
 			rm -rf /soft
 			break
@@ -85,21 +77,21 @@ if [ -d "/soft/shadowsocks" ]; then
 		fi
 	done
 fi
-echo "Updatin exsit package..."
+echo "正在更新退出程序包..."
 yum clean all && rm -rf /var/cache/yum && yum update -y
-echo "Configurating EPEL release..."
+echo "正在配置EPEL版本..."
 yum install epel-release -y && yum makecache
-echo "Install necessary package..."
+echo "安装必要的程序包..."
 yum install git net-tools htop ntp -y
-echo "Disabling firewalld..."
+echo "禁用firewalld ..."
 systemctl stop firewalld && systemctl disable firewalld
-echo "Setting system timezone..."
+echo "设置系统时区..."
 timedatectl set-timezone Asia/Taipei && systemctl stop ntpd.service && ntpdate us.pool.ntp.org
-echo "Installing libsodium..."
+echo "正在安装libsodium ..."
 yum install libsodium -y
-echo "Installing Python3.6..."
+echo "正在安装Python3.6 ..."
 yum install python36 python36-pip -y
-echo "Installing Shadowsocksr server from GitHub..."
+echo "从GitHub安装Shadowsocksr服务器..."
 mkdir /soft
 cd /tmp && git clone -b manyuser https://github.com/Anankke/shadowsocks-mod.git
 mv shadowsocks-mod shadowsocks
@@ -107,28 +99,28 @@ mv -f shadowsocks /soft
 cd /soft/shadowsocks
 pip3 install --upgrade pip setuptools
 pip3 install -r requirements.txt
-echo "Generating config file..."
+echo "正在生成配置文件..."
 cp apiconfig.py userapiconfig.py
 cp config.json user-config.json
 if [[ ${is_auto} != "y" ]]; then
 	#Choose the connection method
 	while :; do echo
-		echo -e "Please select the way your node server connection method:"
+		echo -e "请选择您的节点服务器连接方式："
 		echo -e "\t1. WebAPI"
-		echo -e "\t2. Remote Database"
-		read -p "Please input a number:(Default 2 press Enter) " connection_method
+		echo -e "\t2. 数据库"
+		read -p "请输入数字：（默认2按 Enter）" connection_method
 		[ -z ${connection_method} ] && connection_method=2
 		if [[ ! ${connection_method} =~ ^[1-2]$ ]]; then
-			echo "Bad answer! Please only input number 1~2"
+			echo "错误的输入！ 请只输入数字1〜2"
 		else
 			break
 		fi			
 	done
 	while :; do echo
-		echo -n "Do you want to enable multi user in single port feature?(Y/N)"
+		echo -n "是否要在单端口中启用多用户功能？(Y/N)"
 		read is_mu
 		if [[ ${is_mu} != "y" && ${is_mu} != "Y" && ${is_mu} != "N" && ${is_mu} != "n" ]]; then
-			echo -n "Bad answer! Please only input number Y or N"
+			echo -n "错误的输入！ 请仅输入字母Y或N"
 		else
 			break
 		fi
@@ -136,47 +128,47 @@ if [[ ${is_auto} != "y" ]]; then
 fi
 do_mu(){
 	if [[ ${is_auto} != "y" ]]; then
-		echo -n "Please enter MU_SUFFIX:"
+		echo -n "请输入 MU_SUFFIX:"
 		read mu_suffix
-		echo -n "Please enter MU_REGEX:"
+		echo -n "请输入 MU_REGEX:"
 		read mu_regex
-		echo "Writting MU config..."
+		echo "正在配置..."
 	fi
 	sed -i -e "s/MU_SUFFIX = 'zhaoj.in'/MU_SUFFIX = '${mu_suffix}'/g" -e "s/MU_REGEX = '%5m%id.%suffix'/MU_REGEX = '${mu_regex}'/g" userapiconfig.py
 }
 do_modwebapi(){
 	if [[ ${is_auto} != "y" ]]; then
-		echo -n "Please enter WebAPI url:"
+		echo -n "请输入 WebAPI url:"
 		read webapi_url
-		echo -n "Please enter WebAPI token:"
+		echo -n "请输入 WebAPI token:"
 		read webapi_token
-		echo -n "Server node ID:"
+		echo -n "节点 node ID:"
 		read node_id
 	fi
 	if [[ ${is_mu} == "y" || ${is_mu} == "Y" ]]; then
 		do_mu
 	fi
-	echo "Writting connection config..."
+	echo "正在编写配置..."
 	sed -i -e "s/NODE_ID = 0/NODE_ID = ${node_id}/g" -e "s%WEBAPI_URL = 'https://zhaoj.in'%WEBAPI_URL = '${webapi_url}'%g" -e "s/WEBAPI_TOKEN = 'glzjin'/WEBAPI_TOKEN = '${webapi_token}'/g" userapiconfig.py
 }
 do_glzjinmod(){
 	if [[ ${is_auto} != "y" ]]; then
 		sed -i -e "s/'modwebapi'/'glzjinmod'/g" userapiconfig.py
-		echo -n "Please enter DB server's IP address:"
+		echo -n "请输入数据库服务器的IP地址："
 		read db_ip
-		echo -n "DB name:"
+		echo -n "数据库名:"
 		read db_name
-		echo -n "DB username:"
+		echo -n "数据库用户名:"
 		read db_user
-		echo -n "DB password:"
+		echo -n "数据库密码:"
 		read db_password
-		echo -n "Server node ID:"
+		echo -n "服务器节点ID:"
 		read node_id
 	fi
 	if [[ ${is_mu} == "y" || ${is_mu} == "Y" ]]; then
 		do_mu
 	fi
-	echo "Writting connection config..."
+	echo "正在编写配置..."
 	sed -i -e "s/NODE_ID = 0/NODE_ID = ${node_id}/g" -e "s/MYSQL_HOST = '127.0.0.1'/MYSQL_HOST = '${db_ip}'/g" -e "s/MYSQL_USER = 'ss'/MYSQL_USER = '${db_user}'/g" -e "s/MYSQL_PASS = 'ss'/MYSQL_PASS = '${db_password}'/g" -e "s/MYSQL_DB = 'shadowsocks'/MYSQL_DB = '${db_name}'/g" userapiconfig.py
 }
 if [[ ${is_auto} != "y" ]]; then
@@ -188,7 +180,7 @@ if [[ ${is_auto} != "y" ]]; then
 	fi
 fi
 do_bbr(){
-	echo "Running system optimization and enable BBR..."
+	echo "正在运行系统优化并启用BBR ..."
 	rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
 	rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-3.el7.elrepo.noarch.rpm
 	yum remove kernel-headers -y
@@ -223,43 +215,43 @@ EOF
 	sysctl -p
 }
 do_service(){
-	echo "Writting system config..."
+	echo "正在编写系统配置..."
 	wget --no-check-certificate -O ssr_node.service https://raw.githubusercontent.com/SuicidalCat/Airport-toolkit/master/ssr_node.service.el7
 	chmod 664 ssr_node.service && mv ssr_node.service /etc/systemd/system
-	echo "Starting SSR Node Service..."
+	echo "正在启动SSR节点服务..."
 	systemctl daemon-reload && systemctl enable ssr_node && systemctl start ssr_node
 }
 do_salt_minion(){
-	echo "Installing Salt Minion..."
+	echo "安装Salt Minion ..."
 	curl -L https://bootstrap.saltstack.com -o install_salt.sh && sudo sh install_salt.sh -P
-	echo "Writing Salt config..."
+	echo "正在编写Salt配置..."
 	sed -i -e "s/#master: salt/master: ${salt_master_ip}/g" /etc/salt/minion
 }
 while :; do echo
-	echo -n "Do you want to enable BBR feature(from mainline kernel) and optimizate the system?(Y/N)"
+	echo -n "您要启用BBR功能（写入内核服务）并优化系统吗？(Y/N)"
 	read is_bbr
 	if [[ ${is_bbr} != "y" && ${is_bbr} != "Y" && ${is_bbr} != "N" && ${is_bbr} != "n" ]]; then
-		echo -n "Bad answer! Please only input number Y or N"
+		echo -n "错误的输入！ 请仅输入字母Y或N"
 	else
 		break
 	fi
 done
 while :; do echo
-	echo -n "Do you want to register SSR Node as system service?(Y/N)"
+	echo -n "是否要将SSR节点注册为系统服务？(Y/N)"
 	read is_service
 	if [[ ${is_service} != "y" && ${is_service} != "Y" && ${is_service} != "N" && ${is_service} != "n" ]]; then
-		echo -n "Bad answer! Please only input number Y or N"
+		echo -n "错误的输入！ 请仅输入字母Y或N"
 	else
 		break
 	fi
 done
 while :; do echo
-	echo -n "Do you want to install Salt Minion?(Y/N)"
+	echo -n "您要安装Salt Minion吗？(Y/N)"
 	read is_salt_minion
 	if [[ ${is_salt_minion} != "y" && ${is_salt_minion} != "Y" && ${is_salt_minion} != "N" && ${is_salt_minion} != "n" ]]; then
-		echo -n "Bad answer! Please only input number Y or N"
+		echo -n "错误的输入！ 请仅输入字母Y或N"
 	elif [[ ${is_salt_minion} == "y" && ${is_salt_minion} == "Y" ]]; then
-		echo -n "Please enter Salt Master's IP address:"
+		echo -n "请输入Salt Master的IP地址："
 		read salt_master_ip
 		break
 	else
@@ -275,11 +267,11 @@ fi
 if [[ ${is_salt_minion} == "y" || ${is_salt_minion} == "Y" ]]; then
 	do_salt_minion
 fi
-echo "System require a reboot to complete the installation process, press Y to continue, or press any key else to exit this script."
+echo "系统需要重新启动才能完成安装过程，按Y继续，或按其他任意键退出此脚本。"
 read is_reboot
 if [[ ${is_reboot} == "y" || ${is_reboot} == "Y" ]]; then
   reboot
 else
-  echo -e "Reboot has been canceled..."
+  echo -e "重新启动已被取消..."
 	exit 0
 fi
